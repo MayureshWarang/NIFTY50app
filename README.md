@@ -6,7 +6,7 @@ choose to display the Stock price chart year to date.
 ## How to Run this app:
 *You can click below:*
 
-[![Streamlit App](https://static.streamlit.io/badges/streamlit_badge_black_white.svg)](https://share.streamlit.io/MayureshWarang/NIFTY50app/nifty50app.py/)
+[![Streamlit App](https://static.streamlit.io/badges/streamlit_badge_black_white.svg)](https://share.streamlit.io/MayureshWarang/NIFTY50app/blob/main/nifty50app.py/)
 
 ### OR
 
