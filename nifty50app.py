@@ -1,4 +1,3 @@
-
 import streamlit as st
 import pandas as pd
 import base64
@@ -7,19 +6,20 @@ import yfinance as yf
 
 #Writing the title & description
 
-st.title("Nifty 50 app")
-
+st.image('https://upload.wikimedia.org/wikipedia/en/thumb/b/be/Nifty_50_Logo.svg/1200px-Nifty_50_Logo.svg.png', width = 100)
+st.title("NIFTY 50: India's top 50 companies")
 st.markdown("""
-	This app retrieves the list of the **NIFTY 50** (from Wikipedia) and its corresponding **stock closing price** (year-to-date)!
-* **Python libraries:** base64, pandas, streamlit, numpy, matplotlib, yfinance
-* **Data source:** [Wikipedia](https://en.wikipedia.org/wiki/NIFTY_50).
+Get current list of NIFTY 50 stocks and visualize their closing price charts (year-to-date)!
+
+* **Python libraries**: base64, pandas, streamlit, numpy, matplotlib, yfinance
+* **Data source**: [Wikipedia](https://en.wikipedia.org/wiki/NIFTY_50)
 """)
 
 # Writing the Sidebar header
 
 st.sidebar.header("Choose the sector")
 
-# Webscraping the Nify50 data
+# Webscraping the Nify50 data from Wikipedia
 
 @st.cache
 # Writing a custom function to scrap data
@@ -28,6 +28,7 @@ def load_data():
     html = pd.read_html(url, header = 0)
     df = html[1]
     return df
+
 # loading the data
 df = load_data()
 sector = df.groupby('Sector')
@@ -41,7 +42,11 @@ chosen_sector= st.sidebar.multiselect('Sector options', u_sectors, u_sectors)
 # Filtering data based on sector
 chosen_sector_df = df[df['Sector'].isin(chosen_sector)]
 
-st.header('Display Companies in Selected Sector')
+st.markdown("""
+    ***NOTE:***  *Use the sidebar on left to select **Sectors** & **Number of Companies.** *
+
+""")
+st.header(' List of Companies from Selected Sectors')
 
 # Verify & prompt if empty df
 if chosen_sector_df.empty:
@@ -51,7 +56,7 @@ else:
     st.write('Data Dimension: ' + str(chosen_sector_df.shape[0]) + ' rows and ' + str(chosen_sector_df.shape[1]) + ' columns.')
     st.dataframe(chosen_sector_df)
 
-    # creating a download feature
+    # Creating a CSV download feature
 
     def filedownload(df):
         csv = df.to_csv(index=False)
@@ -61,23 +66,11 @@ else:
 
     st.markdown(filedownload(chosen_sector_df), unsafe_allow_html=True)
 
-    # Loading data of tickers
-
-    data = yf.download(
-            tickers = [(i+ '.NS') for i in list(chosen_sector_df['Symbol'])],
-            period = "ytd",
-            interval = "1d",
-            group_by = 'ticker',
-            auto_adjust = True,
-            prepost = True,
-            threads = True,
-            proxy = None
-        )
-
     # Plot Closing Price of Query Symbols
 
     def price_plot(symbol):
-      df = pd.DataFrame(data[symbol].Close)
+      df = yf.Ticker(symbol + '.NS').history(period="ytd", interval = "1d")
+      #df = pd.DataFrame(data[symbol].Close)
       df['Date'] = df.index
       plt.clf()
       plt.fill_between(df.Date, df.Close, color='skyblue', alpha=0.3)
@@ -87,14 +80,12 @@ else:
       plt.xlabel('Date', fontweight='bold')
       plt.ylabel('Closing Price', fontweight='bold')
       return st.pyplot(plt)
-      
 
     num_company = st.sidebar.slider('Number of Companies', 1, 5)
 
-    if st.button('Show Plots'):
-        st.header('Stock Closing Price')
-        for i in [(i+ '.NS') for i in list(chosen_sector_df['Symbol'])][:num_company]:
+    if st.button('View Price charts'):
+        #st.header('Closing Price')
+        for i in list(chosen_sector_df['Symbol'])[:num_company]:
             price_plot(i)
-
 
 
