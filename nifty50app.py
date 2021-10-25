@@ -1,7 +1,7 @@
 import streamlit as st
 import pandas as pd
 import base64
-import matplotlib.pyplot as plt
+import plotly.express as px
 import yfinance as yf
 
 #Writing the title & description
@@ -72,14 +72,18 @@ else:
       df = yf.Ticker(symbol + '.NS').history(period="ytd", interval = "1d")
       #df = pd.DataFrame(data[symbol].Close)
       df['Date'] = df.index
-      plt.clf()
-      plt.fill_between(df.Date, df.Close, color='skyblue', alpha=0.3)
-      plt.plot(df.Date, df.Close, color='skyblue', alpha=0.8)
-      plt.xticks(rotation=90)
-      plt.title(symbol, fontweight='bold')
-      plt.xlabel('Date', fontweight='bold')
-      plt.ylabel('Closing Price', fontweight='bold')
-      return st.pyplot(plt)
+      plt = px.line(df,x= 'Date', y = 'Close', title = symbol, 
+        labels = {'Close':'<b>Closing Price<b>', 'Date':'<b>Date<b>'})
+      plt.update_layout(font_family="Arial",
+        font_color="black   ", title={
+        'y':0.85,
+        'x':0.5,
+        'xanchor': 'center',
+        'yanchor': 'top'},
+        title_font_family = 'Times New Roman',
+        title_font_color="black")
+      plt.update_xaxes(rangeslider_visible=True, )
+      return st.plotly_chart(plt)
 
     num_company = st.sidebar.slider('Number of Companies', 1, 5)
 
