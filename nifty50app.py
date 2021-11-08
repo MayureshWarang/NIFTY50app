@@ -1,7 +1,7 @@
 import streamlit as st
 import pandas as pd
 import base64
-import matplotlib.pyplot as plt
+import plotly.express as px
 import yfinance as yf
 
 #Writing the title & description
@@ -9,9 +9,9 @@ import yfinance as yf
 st.image('https://upload.wikimedia.org/wikipedia/en/thumb/b/be/Nifty_50_Logo.svg/1200px-Nifty_50_Logo.svg.png', width = 100)
 st.title("NIFTY 50: India's top 50 companies")
 st.markdown("""
-Get current list of NIFTY 50 stocks and visualize their closing price charts (year-to-date)!
+#### Get current list of NIFTY 50 stocks and visualize their year-to-date closing price on Interactive Plotly charts!
 
-* **Python libraries**: base64, pandas, streamlit, numpy, matplotlib, yfinance
+* **Python libraries**: base64, pandas, streamlit, numpy, plotly, yfinance
 * **Data source**: [Wikipedia](https://en.wikipedia.org/wiki/NIFTY_50)
 """)
 
@@ -20,13 +20,12 @@ Get current list of NIFTY 50 stocks and visualize their closing price charts (ye
 st.sidebar.header("Choose the sector")
 
 # Webscraping the Nify50 data from Wikipedia
-
-@st.cache
 # Writing a custom function to scrap data
+@st.cache # Caching skips function re-run if the inputs or code haven't changed
 def load_data():
     url = 'https://en.wikipedia.org/wiki/NIFTY_50'
-    html = pd.read_html(url, header = 0)
-    df = html[1]
+    html = pd.read_html(url, header = 0) # Returns row of all tables in url
+    df = html[1] # Gets the 2nd table with nifty50 stocks
     return df
 
 # loading the data
@@ -43,7 +42,7 @@ chosen_sector= st.sidebar.multiselect('Sector options', u_sectors, u_sectors)
 chosen_sector_df = df[df['Sector'].isin(chosen_sector)]
 
 st.markdown("""
-    ***NOTE:***  *Use the sidebar on left to select **Sectors** & **Number of Companies.** *
+    ***NOTE:***  *Use the sidebar on left to select **Sectors**. *
 
 """)
 st.header(' List of Companies from Selected Sectors')
@@ -72,20 +71,34 @@ else:
       df = yf.Ticker(symbol + '.NS').history(period="ytd", interval = "1d")
       #df = pd.DataFrame(data[symbol].Close)
       df['Date'] = df.index
-      plt.clf()
-      plt.fill_between(df.Date, df.Close, color='skyblue', alpha=0.3)
-      plt.plot(df.Date, df.Close, color='skyblue', alpha=0.8)
-      plt.xticks(rotation=90)
-      plt.title(symbol, fontweight='bold')
-      plt.xlabel('Date', fontweight='bold')
-      plt.ylabel('Closing Price', fontweight='bold')
-      return st.pyplot(plt)
+      #             Using Matplotlib
+      # plt.clf()
+      # plt.fill_between(df.Date, df.Close, color='skyblue', alpha=0.3)
+      # plt.plot(df.Date, df.Close, color='skyblue', alpha=0.8)
+      # plt.xticks(rotation=90)
+      # plt.title(symbol, fontweight='bold')
+      # plt.xlabel('Date', fontweight='bold')
+      # plt.ylabel('Closing Price', fontweight='bold')
+      #             Using Plotly
+      plt = px.line(df,x= 'Date', y = 'Close', title = symbol, 
+        labels = {'Close':'<b>Closing Price<b>', 'Date':'<b>Date<b>'})
+      plt.update_layout(font_family="Arial",
+        font_color="black   ", title={
+        'y':0.85,
+        'x':0.5,
+        'xanchor': 'center',
+        'yanchor': 'top'},
+        title_font_family = 'Times New Roman',
+        title_font_color="black")
+      plt.update_xaxes(rangeslider_visible=True, )
+      return st.plotly_chart(plt)
 
-    num_company = st.sidebar.slider('Number of Companies', 1, 5)
+    num_company = st.slider('Slide to select the Number of charts to plot', 1,10)
 
     if st.button('View Price charts'):
         #st.header('Closing Price')
         for i in list(chosen_sector_df['Symbol'])[:num_company]:
             price_plot(i)
+
 
 
