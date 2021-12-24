@@ -2,12 +2,15 @@ import streamlit as st
 import pandas as pd
 import base64
 import plotly.express as px
+# import plotly.graph_objects as go
 import yfinance as yf
 
 #Writing the title & description
-
-st.image('https://upload.wikimedia.org/wikipedia/en/thumb/b/be/Nifty_50_Logo.svg/1200px-Nifty_50_Logo.svg.png', width = 100)
-st.title("NIFTY 50: India's top 50 companies")
+col1, col2 = st.columns([0.5,5])
+with col1:
+    st.image('https://upload.wikimedia.org/wikipedia/en/thumb/b/be/Nifty_50_Logo.svg/1200px-Nifty_50_Logo.svg.png', width = 100)
+with col2:
+    st.title("NIFTY 50: India's top 50 companies")
 st.markdown("""
 #### Get current list of NIFTY 50 stocks and visualize their year-to-date closing price on Interactive Plotly charts!
 
